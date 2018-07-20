@@ -1,26 +1,10 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package rail;
 import static java.lang.Math.abs;
 import java.util.Scanner;
 
-/**
- *
- * @author 4063
- */
 public class Rail {
-
-    /**
-     * @param args the command line arguments
-     */
     public static void main(String[] args) {
-        // TODO code application logic here
         int key = 0;int i = 0; int j = 0; int len = 0;
-        
-        System.out.println("RAIL FENCE CIPHER");
         
         Scanner reader = new Scanner(System.in);
         Scanner keyread = new Scanner(System.in);
@@ -55,7 +39,6 @@ public class Rail {
         for (i=0;i<key;i++){
             for (j=0;j<len;j++)
                 System.out.print(matrix[i][j]);
-        //    System.out.print("\n");
         }
         System.out.println("\n\nDECRYPTION :");
         System.out.println("\nEnter the key for decryption: ");
