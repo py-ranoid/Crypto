@@ -9,7 +9,6 @@ class PlayFair{
 		char ch;
 		String key;
 		char[][] mat=new char[5][5];
-		System.out.println("HIII");
 		System.out.println("Enter key: ");
 		key = s.nextLine();	
 		keylen = key.length();			

@@ -1,8 +1,7 @@
-package rail;
 import static java.lang.Math.abs;
 import java.util.Scanner;
 
-public class Rail {
+class RailFence {
     public static void main(String[] args) {
         int key = 0;int i = 0; int j = 0; int len = 0;
         
@@ -28,7 +27,6 @@ public class Rail {
         for (i=0;i<len;i++){
             ind = tkey - Math.abs(tkey-i%(2*tkey));
             matrix[ind][i]=a[i];
-            System.out.println(i+","+ind+","+a[i]);
         }
         for (i=0;i<key;i++){
             for (j=0;j<len;j++)
@@ -47,7 +45,8 @@ public class Rail {
         for (i=0;i<len;i++){
             ind = tkey - Math.abs(tkey-i%(2*tkey));
             System.out.print(matrix[ind][i]);
-        }        
+        }
+        System.out.println();
     }
     
 }
