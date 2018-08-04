@@ -2,12 +2,44 @@ import java.util.Arrays;
 
 class DES {
 
-    public boolean[] int2bits(int input){
-        boolean[] bits = new boolean[7];
-        for (int i = 6; i >= 0; i--) {
-            bits[i] = (input & (1 << i)) != 0;
+    public static boolean[] int2bits(int input,int num_bits){
+        boolean[] bits = new boolean[num_bits];
+        for (int i = num_bits-1; i >= 0; i--) {
+            bits[(num_bits-1)-i] = (input & (1 << i)) != 0;
         }
         return bits;
+    }
+    public static int bits2int(boolean bits[]){
+        int n=0;
+        int len = bits.length;
+        for (int i = len-1; i >= 0; i--) {
+            // System.out.println(bits[i]+","+Math.pow(2, (len-1)-i));
+            if (bits[i]){
+              n += Math.pow(2, (len-1)-i);
+            }
+        }
+        return n;
+    }
+    public static String bits2hex(boolean bits[]){
+        int n=0;
+        int len = bits.length;
+        int num_hexes = bits.length/4;
+        String hex_parts = "";
+        if (len % 4 == 0){
+          for (int i = 0; i < num_hexes; i++) {
+              try{
+                int temp = bits2int(Arrays.copyOfRange(bits, i*4, (i+1)*4));
+                hex_parts += Integer.toHexString(temp);
+              }
+              catch (Exception e){
+
+              }
+          }
+          return hex_parts;
+        }
+        else{
+          return "Bye";
+        }
     }
 
     public static boolean[] binstr2bits(String s){
