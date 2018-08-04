@@ -1,22 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package des;
-
-import com.sun.xml.internal.bind.v2.model.util.ArrayInfoUtil;
 import java.util.Arrays;
 
-/**
- *
- * @author 4128
- */
-public class DES {
+class DES {
 
-    /**
-     * @param args the command line arguments
-     */
     public boolean[] int2bits(int input){
         boolean[] bits = new boolean[7];
         for (int i = 6; i >= 0; i--) {
@@ -24,13 +9,14 @@ public class DES {
         }
         return bits;
     }
+
     public static boolean[] binstr2bits(String s){
         String[] stringparts = s.split(" ");
         String reduced_s = String.join("", stringparts);
         int num_bits = reduced_s.length();
         boolean[] bits = new boolean[num_bits];
         for (int i = 0; i < num_bits; i++) {
-            if (s.charAt(i) == '1'){
+            if (reduced_s.charAt(i) == '1'){
                 bits[i] = true;
             }
             else{
@@ -39,7 +25,9 @@ public class DES {
         }
         return bits;
     }
-        public static boolean[] bits2str(boolean[] bits){
+
+    public static boolean[] bits2str(boolean[] bits){
+        System.out.println(bits.length);
         for (int i = 0; i < bits.length; i++) {
             if (bits[i]){
                 System.out.print("1");
@@ -48,48 +36,41 @@ public class DES {
                 System.out.print("0");
             }
         }
+        System.out.println();
         return bits;
     }
+
     public static boolean[] permute(boolean[] in_bits,int[][] P) {
         int P_len = P.length*P[0].length;
         boolean[] out_bits = new boolean[P_len];
         int counter = 0;
         int index;
-        for (int i = 0;i<P.length;i++){            
-            for(int j = 0;j<P[0].length;j++){ 
-                System.out.println(i+","+j);
+        for (int i = 0;i<P.length;i++){
+            for(int j = 0;j<P[0].length;j++){
                 index = P[i][j]-1;
-                try{
-                    out_bits[counter++] = in_bits[index];
-                    //System.out.println("ok "+counter+"/"+out_bits.length+" "+index+"/"+in_bits.length);
-                }
-                catch(Exception ex){
-                    //System.out.println("er "+counter+"/"+out_bits.length+" "+index+"/"+in_bits.length);
-                    System.exit(1);
-                }
+                out_bits[counter++] = in_bits[index];
             }
         }
         return out_bits;
     }
-    
+
     public static boolean[] leftShift(boolean[] in_bits,int n) {
         int index;
         int in_length = in_bits.length;
         boolean[] out_bits = new boolean[in_length];
-        System.out.println("");
         for (int i = 0;i<in_length;i++){
             index = (i+n)%in_length;
-            out_bits[i] = in_bits[index];            
+            out_bits[i] = in_bits[index];
         }
         return out_bits;
     }
-    
+
     public static boolean [] concat(boolean [] first, boolean [] second) {
       boolean[] result = Arrays.copyOf(first, first.length + second.length);
       System.arraycopy(second, 0, result, first.length, second.length);
       return result;
     }
-    
+
     public static boolean[][] keyGen(String init_key) {
         int[][] PC1 = new int[][] {
             {57,49,41,33,25,17,9},
@@ -113,26 +94,24 @@ public class DES {
         };
         boolean[] K = binstr2bits(init_key);
         boolean[] K_plus = permute(K, PC1);
-        bits2str(K_plus);
         boolean[][] C = new boolean[17][28];
         boolean[][] D = new boolean[17][28];
         boolean[][] Keys = new boolean[16][48];
-        
+
         C[0] = Arrays.copyOfRange(K_plus, 0, 28);
         D[0] = Arrays.copyOfRange(K_plus, 28, K_plus.length);;
-        
+
         int[] shiftNums = {1,1,2,2,2,2,2,2,1,2,2,2,2,2,2,1};
-        for (int i=1;i<16;i++){
-            C[i] = leftShift(C[i-1], shiftNums[i]);
-            D[i] = leftShift(D[i-1], shiftNums[i]);            
+        for (int i=1;i<17;i++){
+            C[i] = leftShift(C[i-1], shiftNums[i-1]);
+            D[i] = leftShift(D[i-1], shiftNums[i-1]);
             Keys[i-1] = permute(concat(C[i], D[i]), PC2);
         }
-        return Keys;      
+        return Keys;
     }
+    
     public static void main(String[] args) {
         boolean[][] Keys = keyGen("00010011 00110100 01010111 01111001 10011011 10111100 11011111 11110001");
         bits2str(Keys[0]);
-        // TODO code application logic here
     }
-    
 }
