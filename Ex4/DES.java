@@ -21,25 +21,25 @@ class DES {
         return n;
     }
     public static String bits2hex(boolean bits[]){
-        int n=0;
-        int len = bits.length;
         int num_hexes = bits.length/4;
         String hex_parts = "";
-        if (len % 4 == 0){
-          for (int i = 0; i < num_hexes; i++) {
-              try{
-                int temp = bits2int(Arrays.copyOfRange(bits, i*4, (i+1)*4));
-                hex_parts += Integer.toHexString(temp);
-              }
-              catch (Exception e){
-
-              }
+        for (int i = 0; i < num_hexes; i++) {
+          int temp = bits2int(Arrays.copyOfRange(bits, i*4, (i+1)*4));
+          hex_parts += Integer.toHexString(temp);
+        }
+          return hex_parts.toUpperCase();
+    }
+    public static boolean[] hex2bits(String hexString){
+        int num_hexes = hexString.length();
+        boolean[] bits = new boolean [num_hexes*4];
+        boolean[] temp;
+        for (int i = 0; i < num_hexes; i++) {
+          temp = int2bits(Integer.parseInt(String.valueOf(hexString.charAt(i)),16), 4);
+          for (int j=0;j<4;j++){
+            bits[i*4+j] = temp[j];
           }
-          return hex_parts;
         }
-        else{
-          return "Bye";
-        }
+        return bits;
     }
 
     public static boolean[] binstr2bits(String s){
@@ -235,7 +235,7 @@ class DES {
       int chosen_num = chosed_S[row_num][col_num];
       return int2bits(chosen_num, 4);
     }
-    public static String encrypt(String message, boolean[][] keys) {
+    public static String encrypt(String hexMessage, boolean[][] keys) {
 
 
       int[][] IP_matrix = new int[][] {
@@ -258,7 +258,9 @@ class DES {
         {34,2,42,10,50,18,58,26},
         {33,1,41,9,49,17,57,25}
       };
-      boolean[] M = binstr2bits(message);
+
+      // boolean[] M = binstr2bits(message);
+      boolean[] M = hex2bits(hexMessage);
       boolean[] IP = permute(M, IP_matrix);
 
       boolean[][] L = new boolean[17][32];
@@ -274,7 +276,7 @@ class DES {
       return bits2hex(permute(concat(R[16], L[16]),IP_inv_matrix));
     }
     public static void main(String[] args) {
-        boolean[][] Keys = keyGen("00010011 00110100 01010111 01111001 10011011 10111100 11011111 11110001");
-        System.out.println(encrypt("0000 0001 0010 0011 0100 0101 0110 0111 1000 1001 1010 1011 1100 1101 1110 1111",Keys).toUpperCase());
+        boolean[][] Keys = keyGen("00010011 00110100 01010111 01111001 10011011 10111100 11011111 11110001");        
+        System.out.println(encrypt("0123456789ABCDEF",Keys));
     }
 }
