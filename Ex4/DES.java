@@ -1,5 +1,6 @@
 import java.util.Arrays;
 import java.util.Scanner;
+import java.util.Collections;
 
 class DES {
     static int[][] IP_matrix = new int[][] {
@@ -271,33 +272,20 @@ class DES {
       }
       return bits2hex(permute(concat(R[16], L[16]),IP_inv_matrix));
     }
-    public static String decrypt(String encMessage, boolean[][] keys) {
-      // boolean[] M = binstr2bits(message);
-      boolean[] M = hex2bits(encMessage);
-      boolean[] IP = permute(M, IP_matrix);
-
-      boolean[][] L = new boolean[17][32];
-      boolean[][] R = new boolean[17][32];
-
-      L[0] = Arrays.copyOfRange(IP, 0, 32);
-      R[0] = Arrays.copyOfRange(IP, 32, IP.length);
-
-      for (int i =1;i<17;i++){
-          L[i] = R[i-1];
-          R[i] = arrayXOR(L[i-1],feistel(R[i-1],keys[(keys.length-1) - (i-1)]));
-      }
-      return bits2hex(permute(concat(R[16], L[16]),IP_inv_matrix));
-    }
 
     public static void main(String[] args) {
         boolean[][] Keys = keyGen("00010011 00110100 01010111 01111001 10011011 10111100 11011111 11110001");
         String message;
-        // Scanner scan=new Scanner(System.in);
-        // message = scan.nextLine()
-        message = "0123456789ABCDEF";
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter Message (16 hex chars): ");
+        message = scanner.nextLine();
+        // message = "0123456789ABCDEF";
         String encrypted = encrypt(message,Keys);
         System.out.println(message+" encrypted : "+encrypted);
-        String decrypted = decrypt(encrypted,Keys);
+
+        // Reverse order of Keys for decryption
+        Collections.reverse(Arrays.asList(Keys));
+        String decrypted = encrypt(encrypted,Keys);
         System.out.println(encrypted+" decrypted : "+decrypted);
     }
 }
