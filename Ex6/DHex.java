@@ -1,4 +1,5 @@
 import java.util.Arrays;
+import java.util.Random;;
 import java.util.Scanner;
 
 class DHex{
@@ -18,23 +19,22 @@ class DHex{
     int alpha = scanner.nextInt();
     // A & B agree upon q and alpha
 
-    System.out.print("Enter Secret Key (A): ");
-    int Xa = scanner.nextInt();
-    System.out.print("Enter Secret Key (B): ");
-    int Xb = scanner.nextInt();
-    System.out.println("Xa = "+Xa+"\t\t Xb = "+Xb);
+    Random r = new Random();
+    int Xa = r.nextInt(q);
+    int Xb = r.nextInt(q);
+    System.out.println("Xa = "+Xa+"  Xb = "+Xb);
     // A & B randomly generate secret keys
 
     int Ya = modmul(alpha, Xa, q);
     int Yb = modmul(alpha, Xb, q);
-    System.out.println("Ya = "+Ya+"\t\t Yb = "+Yb);
-    // A and B generate public keys
+    System.out.println("Ya = "+Ya+"  Yb = "+Yb);
+    // A and B generate public keys and share them with each other
 
     int Kb = modmul(Ya, Xb, q);
     int Ka = modmul(Yb, Xa, q);
     // A and B generate shared session key
     // using other's private key and its own secret key
-    System.out.println("Ka = "+Ka+"\t Kb = "+Kb);
+    System.out.println("Ka = "+Ka+"  Kb = "+Kb);
     scanner.close();
   }
 }
