@@ -23,13 +23,15 @@ class RSA{
       }
     return new int[][] {{e,n},{d,n}};
   }
+  public static int modmul(int n,int exp, int mod){
+    int result = n%mod;
+    for (int i =1;i<exp;i++){
+      result = (result*n)%mod;
+    }
+    return result;
+  }
   public static double encrypt(int[] key,int m){
-    int step=5;
-    int quo = key[0]/step;
-    int rem = key[0]%step;
-    double quo_part = Math.pow(Math.pow(m, step)%key[1],quo);
-    double rem_part = Math.pow(m, rem)%key[1];
-    return (int)((quo_part*rem_part)%key[1]);
+    return modmul(m,key[0],key[1]);
   }
 
   public static void main(String[] args) {
