@@ -2,7 +2,7 @@ import java.util.Arrays;
 import java.util.Scanner;
 import java.util.Collections;
 
-class DES {
+class DES{
     static int[][] IP_matrix = new int[][] {
       {58,50,42,34,26,18,10,2},
       {60,52,44,36,28,20,12,4},
@@ -277,12 +277,24 @@ class DES {
         String enc2 = DESencrypt(enc1, keys2);
         return enc2;
     }
-    public static String DES2decrypt(String encMessage, boolean[][] keys1,boolean[][] keys2) {
+    public static String DES3encrypt(String hexMessage, boolean[][] keys1,boolean[][] keys2) {
+        String enc1 = DESencrypt(hexMessage, keys1);
+        System.out.println(enc1);
         Collections.reverse(Arrays.asList(keys2));
-        String dec = DESencrypt(encMessage, keys2);
+        String enc2 = DESencrypt(enc1, keys2);
+        System.out.println(enc2);
+        String enc3 = DESencrypt(enc2, keys1);
+        return enc3;
+    }
+    public static String DES3decrypt(String encMessage, boolean[][] keys1,boolean[][] keys2) {
         Collections.reverse(Arrays.asList(keys1));
-        String dec2 = DESencrypt(dec, keys1);
-        return dec2;
+        String dec1 = DESencrypt(encMessage, keys1);
+        System.out.println(dec1);
+        String dec2 = DESencrypt(dec1, keys2);
+        System.out.println(dec2);
+        Collections.reverse(Arrays.asList(keys1));
+        String dec3 = DESencrypt(dec2, keys1);
+        return dec3;
     }
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
@@ -300,6 +312,7 @@ class DES {
         // message = scanner.nextLine();
         message = "0123456789ABCDEF";
         encrypted = DESencrypt(message,Keys);
+        System.out.println("Single DES");
         System.out.println("Encrypted : "+encrypted);
 
         // Reverse order of Keys for decryption
@@ -322,11 +335,35 @@ class DES {
         // message = scanner.nextLine();
         message = "0123456789ABCDEF";
         encrypted = DES2encrypt(message,Keys1,Keys2);
+        System.out.println("Double DES");
         System.out.println("Encrypted : "+encrypted);
 
-        decrypted = DES2decrypt(encrypted,Keys1,Keys2);
+        Collections.reverse(Arrays.asList(Keys1));
+        Collections.reverse(Arrays.asList(Keys2));
+        decrypted = DES2encrypt(encrypted,Keys2,Keys1);
         System.out.println("Decrypted : "+decrypted);
         scanner.close();
+
+        /* TRIPLE DES */
+
+        strKey1 = "00010011 00110100 01010111 01111001 10011011 10111100 11011111 11110001";
+        strKey2 = "00010011 01110100 11010100 11001001 10011011 10100100 11011111 11110001";
+        // strKey3 = "11010011 11110100 10010100 01111001 11111011 10100110 11010011 11110001";
+        Keys1 = keyGen(strKey1);Keys2 = keyGen(strKey2);
+        message = "0123456789ABCDEF";
+
+        System.out.println("Triple DES");
+        encrypted = DES3encrypt(message, Keys1, Keys2);
+        System.out.println("Encrypted : "+encrypted);
+
+        decrypted = DES3decrypt(encrypted,Keys1,Keys2);
+        System.out.println("Decrypted : "+decrypted);
+
+        Collections.reverse(Arrays.asList(Keys1));
+        Collections.reverse(Arrays.asList(Keys2));
+        decrypted = DES3encrypt(encrypted,Keys1,Keys2);
+        System.out.println("Decrypted : "+decrypted);
+        // decrypted = DES3decrypt(encrypted, Keys1, Keys2);
 
     }
 }
