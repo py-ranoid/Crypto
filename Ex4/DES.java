@@ -255,7 +255,7 @@ class DES {
       int chosen_num = chosed_S[row_num][col_num];
       return int2bits(chosen_num, 4);
     }
-    public static String encrypt(String hexMessage, boolean[][] keys) {
+    public static String DESencrypt(String hexMessage, boolean[][] keys) {
       // boolean[] M = binstr2bits(message);
       boolean[] M = hex2bits(hexMessage);
       boolean[] IP = permute(M, IP_matrix);
@@ -272,24 +272,61 @@ class DES {
       }
       return bits2hex(permute(concat(R[16], L[16]),IP_inv_matrix));
     }
-
+    public static String DES2encrypt(String hexMessage, boolean[][] keys1,boolean[][] keys2) {
+        String enc1 = DESencrypt(hexMessage, keys1);
+        String enc2 = DESencrypt(enc1, keys2);
+        return enc2;
+    }
+    public static String DES2decrypt(String encMessage, boolean[][] keys1,boolean[][] keys2) {
+        Collections.reverse(Arrays.asList(keys2));
+        String dec = DESencrypt(encMessage, keys2);
+        Collections.reverse(Arrays.asList(keys1));
+        String dec2 = DESencrypt(dec, keys1);
+        return dec2;
+    }
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter 64 bit binary key (16 hex chars): ");
-        String strKey,message;
-        strKey = scanner.nextLine();
-        // strKey = "00010011 00110100 01010111 01111001 10011011 10111100 11011111 11110001";
-        boolean[][] Keys = keyGen(strKey);
-        System.out.println("Enter Message (16 hex chars): ");
-        message = scanner.nextLine();
-        // message = "0123456789ABCDEF";
-        String encrypted = encrypt(message,Keys);
+        String strKey,strKey1,strKey2,message,encrypted,decrypted;
+        boolean[][] Keys,Keys1,Keys2;
+
+        /* SINGLE DES */
+
+        // System.out.println("Enter 64 bit binary key (16 hex chars): ");
+        // strKey1 = scanner.nextLine();
+        strKey = "00010011 00110100 01010111 01111001 10011011 10111100 11011111 11110001";
+        Keys = keyGen(strKey);
+
+        // System.out.println("Enter Message (16 hex chars): ");
+        // message = scanner.nextLine();
+        message = "0123456789ABCDEF";
+        encrypted = DESencrypt(message,Keys);
         System.out.println("Encrypted : "+encrypted);
 
         // Reverse order of Keys for decryption
         Collections.reverse(Arrays.asList(Keys));
-        String decrypted = encrypt(encrypted,Keys);
+        decrypted = DESencrypt(encrypted,Keys);
         System.out.println("Decrypted : "+decrypted);
         scanner.close();
+
+        /* DOUBLE DES */
+
+        // System.out.println("K1 : Enter 64 bit binary key (16 hex chars): ");
+        // strKey1 = scanner.nextLine();
+        // System.out.println("K2 : Enter 64 bit binary key (16 hex chars): ");
+        // strKey2 = scanner.nextLine();
+        strKey1 = "00010011 00110100 01010111 01111001 10011011 10111100 11011111 11110001";
+        strKey2 = "00010011 01110100 11010100 11001001 10011011 10100100 11011111 11110001";
+        Keys1 = keyGen(strKey1);Keys2 = keyGen(strKey2);
+
+        // System.out.println("Enter Message (16 hex chars): ");
+        // message = scanner.nextLine();
+        message = "0123456789ABCDEF";
+        encrypted = DES2encrypt(message,Keys1,Keys2);
+        System.out.println("Encrypted : "+encrypted);
+
+        decrypted = DES2decrypt(encrypted,Keys1,Keys2);
+        System.out.println("Decrypted : "+decrypted);
+        scanner.close();
+
     }
 }
