@@ -274,18 +274,22 @@ class DES {
     }
 
     public static void main(String[] args) {
-        boolean[][] Keys = keyGen("00010011 00110100 01010111 01111001 10011011 10111100 11011111 11110001");
-        String message;
         Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter 64 bit binary key (16 hex chars): ");
+        String strKey,message;
+        strKey = scanner.nextLine();
+        // strKey = "00010011 00110100 01010111 01111001 10011011 10111100 11011111 11110001";
+        boolean[][] Keys = keyGen(strKey);
         System.out.println("Enter Message (16 hex chars): ");
         message = scanner.nextLine();
         // message = "0123456789ABCDEF";
         String encrypted = encrypt(message,Keys);
-        System.out.println(message+" encrypted : "+encrypted);
+        System.out.println("Encrypted : "+encrypted);
 
         // Reverse order of Keys for decryption
         Collections.reverse(Arrays.asList(Keys));
         String decrypted = encrypt(encrypted,Keys);
-        System.out.println(encrypted+" decrypted : "+decrypted);
+        System.out.println("Decrypted : "+decrypted);
+        scanner.close();
     }
 }
