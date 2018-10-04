@@ -1,3 +1,10 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package md5;
+
 import java.util.Scanner;
 import java.util.Arrays;
 
@@ -9,6 +16,13 @@ public class MD5 {
         }
         return bits;
     }
+    static int[]s = new int[] { 
+        7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22, 
+        5,  9, 14, 20,  5,  9, 14, 20,  5,  9, 14, 20,  5,  9, 14, 20,
+        4, 11, 16, 23,  4, 11, 16, 23,  4, 11, 16, 23,  4, 11, 16, 23,
+        6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21,
+        };
+
     public static boolean[] int2bits(int input,int num_bits){
         boolean[] bits = new boolean[num_bits];
         for (int i = num_bits-1; i >= 0; i--) {
@@ -80,7 +94,7 @@ public class MD5 {
         long[] K = new long[64];
         long Two32 = (long)(Math.pow(2, 32));
         for (int i=0;i<64;i++){
-            System.out.println((long) (Math.abs(Math.sin(i+1)*Two32)));
+            // System.out.println((long) (Math.abs(Math.sin(i+1)*Two32)));
             K[i] = (long) Math.floor(Math.abs(Math.sin(i+1)*Two32));
         }         
         return K;
@@ -129,43 +143,65 @@ public class MD5 {
         }
         boolean[] fin = concat(binstr2bits(message), int2bits(message.length(), 64));
         System.out.println("Length of final string :"+fin.length);
-        String[] ABCD = new String[] {"01234567","89ABCDEF","FEDCBA98","76543210"};
-        boolean[][] ABCD_bin = new boolean[4][32];
-        for (int i=0;i<ABCD.length;i++){
-            ABCD_bin[i] = hex2bits(ABCD[0]);
-        }
+        String[] ABCD = new String[] {"67452301","efcdab89","98badcfe","10325476"};
+        int[] ABCD_val = {0x67452301,0xefcdab89,0x98badcfe,0x10325476};
+//        int[] ABCD_val = new int[4];
+//        for (int i=0;i<ABCD.length;i++){
+//            ABCD_val[i] = bits2int(hex2bits(ABCD[i]));
+//        }
+        System.out.println("BEFORE");
+        System.out.println(ABCD_val[0]);
+        System.out.println(ABCD_val[1]);
+        System.out.println(ABCD_val[2]);
+        System.out.println(ABCD_val[3]);
+        System.out.println("AFTER");
         long[] K = K_gen();
-        System.out.println(long2bits((int)K[11],32));
         for (int outer =0;outer<fin.length/512;outer++){
-            for (int inner=0;inner<16;inner++){
-                boolean[] A = ABCD_bin[0];
-                boolean[] B = ABCD_bin[1];
-                boolean[] C = ABCD_bin[2];
-                boolean[] D = ABCD_bin[3];
-                for (int i=0;i<64;i++){
-                    boolean[] F = new boolean[32];
-                    boolean[] g = new boolean[32];
-                    if (i>=0 && i<=15){
-                        F = OR(AND(B, C),AND(NOT(B),D));
-                        g = int2bits(i, 32);
-                    }
-                    else if (i>15 && i <=31){
-                        F = OR(AND(D, B),AND(NOT(D),B));
-                        g = int2bits((5*i+1)%16, 32);
-                    }
-                    else if (i>31 && i <=47){
-                        F = XOR(XOR(B,C), D);
-                        g = int2bits((3*i+5)%16, 32);
-                    }
-                    else{
-                        F = XOR(C,OR(B,NOT(D)));
-                        g = int2bits((7*i)%16, 32);
-                    }
-                    F = F 
+            boolean[] M_block = Arrays.copyOfRange(fin, outer*512, (outer+1)*512);
+            int A = ABCD_val[0];
+            int B = ABCD_val[1];
+            int C = ABCD_val[2];
+            int D = ABCD_val[3];
+
+            for (int i=0;i<64;i++){
+                int F,g;
+                if (i>=0 && i<=15){
+                    F = (B & C) | (~B & D);
+                    g = i;
                 }
+                else if (i>15 && i <=31){
+                    F = (D & B) | (~D & B);
+                    g = (5*i+1)%16;
+                }
+                else if (i>31 && i <=47){
+                    F = B ^ C ^ D;
+                    g = (3*i+5)%16;
+                }
+                else{
+                    F = C ^ (B | ~D);
+                    g = (7*i)%16;
+                }
+                int int_message = bits2int(Arrays.copyOfRange(M_block, g*32, (g+1)*32));
+                F = (int) (F + A +K[i] + (int)K[i] + int_message);
+                A = D;
+                D = C;
+                C = B;          
+                B = B + Integer.rotateLeft(F, s[i]);
+                System.out.println(A+" - "+ B + " - "+ C +" - "+ D);
             }
+            ABCD_val[0]+=A;
+            ABCD_val[1]+=B;
+            ABCD_val[2]+=C;
+            ABCD_val[3]+=D;      
+
+
         }
+        System.out.println(ABCD_val[0]);
+        System.out.println(ABCD_val[1]);
+        System.out.println(ABCD_val[2]);
+        System.out.println(ABCD_val[3]);
+        String hash = bits2hex(int2bits(ABCD_val[0], 32))+bits2hex(int2bits(ABCD_val[1], 32))+bits2hex(int2bits(ABCD_val[2], 32))+bits2hex(int2bits(ABCD_val[3], 32));
+        System.out.println("HASH: "+hash);
     }   
     
 }
-
