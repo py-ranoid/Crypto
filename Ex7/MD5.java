@@ -1,207 +1,98 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package md5;
-
 import java.util.Scanner;
-import java.util.Arrays;
 
 public class MD5 {
-    public static boolean[] long2bits(long input,int num_bits){
-        boolean[] bits = new boolean[num_bits];
-        for (int i = num_bits-1; i >= 0; i--) {
-            bits[(num_bits-1)-i] = (input & (1 << i)) != 0;
-        }
-        return bits;
+    private static final int   INIT_A     = 0x67452301;
+    private static final int   INIT_B     = (int) 0xEFCDAB89L;
+    private static final int   INIT_C     = (int) 0x98BADCFEL;
+    private static final int   INIT_D     = 0x10325476;
+    private static final int[] SHIFT_AMTS = { 7, 12, 17, 22, 5, 9, 14, 20, 4,
+            11, 16, 23, 6, 10, 15, 21    };
+    private static final int[] TABLE_T    = new int[64];
+    static {
+        for (int i = 0; i < 64; i++)
+            TABLE_T[i] = (int) (long) ((1L << 32) * Math.abs(Math.sin(i + 1)));
     }
-    static int[]s = new int[] { 
-        7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22, 
-        5,  9, 14, 20,  5,  9, 14, 20,  5,  9, 14, 20,  5,  9, 14, 20,
-        4, 11, 16, 23,  4, 11, 16, 23,  4, 11, 16, 23,  4, 11, 16, 23,
-        6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21,
-        };
-
-    public static boolean[] int2bits(int input,int num_bits){
-        boolean[] bits = new boolean[num_bits];
-        for (int i = num_bits-1; i >= 0; i--) {
-            bits[(num_bits-1)-i] = (input & (1 << i)) != 0;
+ 
+    public static byte[] computeMD5(byte[] message) {
+        int messageLenBytes = message.length;
+        int numBlocks = ((messageLenBytes + 8) >>> 6) + 1;
+        int totalLen = numBlocks << 6;
+        byte[] paddingBytes = new byte[totalLen - messageLenBytes];
+        paddingBytes[0] = (byte) 0x80;
+        long messageLenBits = (long) messageLenBytes << 3;
+        for (int i = 0; i < 8; i++) {
+            paddingBytes[paddingBytes.length - 8 + i] = (byte) messageLenBits;
+            messageLenBits >>>= 8;
         }
-        return bits;
-    }
-    public static boolean[] AND(boolean [] a, boolean [] b) {
-        boolean[] bits = new boolean[a.length];
-        for (int i =0;i<a.length;i++){
-          bits[i] = a[i] & b[i];
-        }
-        return bits;
-    }
-    public static boolean[] OR(boolean [] a, boolean [] b) {
-        boolean[] bits = new boolean[a.length];
-        for (int i =0;i<a.length;i++){
-          bits[i] = a[i] | b[i];
-        }
-        return bits;
-    }
-    public static boolean[] NOT(boolean [] a) {
-        boolean[] bits = new boolean[a.length];
-        for (int i =0;i<a.length;i++){
-          bits[i] = !a[i];
-        }
-        return bits;
-    }
-    public static boolean[] XOR(boolean [] a, boolean [] b) {
-        boolean[] bits = new boolean[a.length];
-        for (int i =0;i<a.length;i++){
-          bits[i] = a[i]^ b[i];
-        }
-        return bits;
-    }
-    public static boolean [] concat(boolean [] first, boolean [] second) {
-        boolean[] result = Arrays.copyOf(first, first.length + second.length);
-        System.arraycopy(second, 0, result, first.length, second.length);
-        return result;
-      }
-    public static boolean[] binstr2bits(String s){
-        String[] stringparts = s.split(" ");
-        String reduced_s = String.join("", stringparts);
-        int num_bits = reduced_s.length();
-        boolean[] bits = new boolean[num_bits];
-        for (int i = 0; i < num_bits; i++) {
-            if (reduced_s.charAt(i) == '1'){
-                bits[i] = true;
+        int a = INIT_A;
+        int b = INIT_B;
+        int c = INIT_C;
+        int d = INIT_D;
+        int[] buffer = new int[16];
+        for (int i = 0; i < numBlocks; i++) {
+            int index = i << 6;
+            for (int j = 0; j < 64; j++, index++)
+                buffer[j >>> 2] = ((int) ((index < messageLenBytes) ? message[index] : paddingBytes[index - messageLenBytes]) << 24) | (buffer[j >>> 2] >>> 8);
+            int originalA = a;
+            int originalB = b;
+            int originalC = c;
+            int originalD = d;
+            for (int j = 0; j < 64; j++) {
+                int div16 = j >>> 4;
+                int f = 0;
+                int bufferIndex = j;
+                switch (div16) {
+                    case 0:
+                        f = (b & c) | (~b & d);
+                        break;
+                    case 1:
+                        f = (b & d) | (c & ~d);
+                        bufferIndex = (bufferIndex * 5 + 1) & 0x0F;
+                        break;
+                    case 2:
+                        f = b ^ c ^ d;
+                        bufferIndex = (bufferIndex * 3 + 5) & 0x0F;
+                        break;
+                    case 3:
+                        f = c ^ (b | ~d);
+                        bufferIndex = (bufferIndex * 7) & 0x0F;
+                        break;
+                }
+                int temp = b + Integer.rotateLeft(a + f + buffer[bufferIndex] + TABLE_T[j], SHIFT_AMTS[(div16 << 2) | (j & 3)]);
+                a = d;
+                d = c;
+                c = b;
+                b = temp;
             }
-            else{
-                bits[i] = false;
-            }
+            a += originalA;
+            b += originalB;
+            c += originalC;
+            d += originalD;
         }
-        return bits;
-    }
-    public static boolean[] hex2bits(String hexString){
-        int num_hexes = hexString.length();
-        boolean[] bits = new boolean [num_hexes*4];
-        boolean[] temp;
-        for (int i = 0; i < num_hexes; i++) {
-          temp = int2bits(Integer.parseInt(String.valueOf(hexString.charAt(i)),16), 4);
-          for (int j=0;j<4;j++){
-            bits[i*4+j] = temp[j];
-          }
-        }
-        return bits;
-    }
-    public static long[] K_gen(){
-        long[] K = new long[64];
-        long Two32 = (long)(Math.pow(2, 32));
-        for (int i=0;i<64;i++){
-            // System.out.println((long) (Math.abs(Math.sin(i+1)*Two32)));
-            K[i] = (long) Math.floor(Math.abs(Math.sin(i+1)*Two32));
-        }         
-        return K;
-    }
-    public static int bits2int(boolean bits[]){
-        int n=0;
-        int len = bits.length;
-        for (int i = len-1; i >= 0; i--) {
-            // System.out.println(bits[i]+","+Math.pow(2, (len-1)-i));
-            if (bits[i]){
-              n += Math.pow(2, (len-1)-i);
+        byte[] md5 = new byte[16];
+        int count = 0;
+        for (int i = 0; i < 4; i++) {
+            int n = (i == 0) ? a : ((i == 1) ? b : ((i == 2) ? c : d));
+            for (int j = 0; j < 4; j++) {
+                md5[count++] = (byte) n;
+                n >>>= 8;
             }
         }
-        return n;
+        return md5;
     }
-
-    public static String bits2hex(boolean bits[]){
-        int num_hexes = bits.length/4;
-        String hex_parts = "";
-        for (int i = 0; i < num_hexes; i++) {
-          int temp = bits2int(Arrays.copyOfRange(bits, i*4, (i+1)*4));
-          hex_parts += Integer.toHexString(temp);
+ 
+    public static String toHexString(byte[] b) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < b.length; i++) {
+            sb.append(String.format("%02X", b[i] & 0xFF));
         }
-          return hex_parts.toUpperCase();
+        return sb.toString();
     }
+ 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter message");
-        String message = scanner.nextLine();
-        boolean[] bin_message = binstr2bits(message);
-        int m_len = bin_message.length;
-        int left_over = 448 - (m_len%512);
-        System.out.println(left_over);
-        if (left_over > 0){
-            message += "1";
-            for (int i=1;i<left_over;i++){
-                message += "0";
-            }
-        }
-        else{
-            message += "1";
-            for (int i=(m_len%512+1);i<512;i++)
-                message += "0";
-            for (int i=0;i<448;i++)
-                message += "0";
-        }
-        boolean[] fin = concat(binstr2bits(message), int2bits(message.length(), 64));
-        System.out.println("Length of final string :"+fin.length);
-        String[] ABCD = new String[] {"67452301","efcdab89","98badcfe","10325476"};
-        int[] ABCD_val = {0x67452301,0xefcdab89,0x98badcfe,0x10325476};
-//        int[] ABCD_val = new int[4];
-//        for (int i=0;i<ABCD.length;i++){
-//            ABCD_val[i] = bits2int(hex2bits(ABCD[i]));
-//        }
-        System.out.println("BEFORE");
-        System.out.println(ABCD_val[0]);
-        System.out.println(ABCD_val[1]);
-        System.out.println(ABCD_val[2]);
-        System.out.println(ABCD_val[3]);
-        System.out.println("AFTER");
-        long[] K = K_gen();
-        for (int outer =0;outer<fin.length/512;outer++){
-            boolean[] M_block = Arrays.copyOfRange(fin, outer*512, (outer+1)*512);
-            int A = ABCD_val[0];
-            int B = ABCD_val[1];
-            int C = ABCD_val[2];
-            int D = ABCD_val[3];
-
-            for (int i=0;i<64;i++){
-                int F,g;
-                if (i>=0 && i<=15){
-                    F = (B & C) | (~B & D);
-                    g = i;
-                }
-                else if (i>15 && i <=31){
-                    F = (D & B) | (~D & B);
-                    g = (5*i+1)%16;
-                }
-                else if (i>31 && i <=47){
-                    F = B ^ C ^ D;
-                    g = (3*i+5)%16;
-                }
-                else{
-                    F = C ^ (B | ~D);
-                    g = (7*i)%16;
-                }
-                int int_message = bits2int(Arrays.copyOfRange(M_block, g*32, (g+1)*32));
-                F = (int) (F + A +K[i] + (int)K[i] + int_message);
-                A = D;
-                D = C;
-                C = B;          
-                B = B + Integer.rotateLeft(F, s[i]);
-                System.out.println(A+" - "+ B + " - "+ C +" - "+ D);
-            }
-            ABCD_val[0]+=A;
-            ABCD_val[1]+=B;
-            ABCD_val[2]+=C;
-            ABCD_val[3]+=D;      
-
-
-        }
-        System.out.println(ABCD_val[0]);
-        System.out.println(ABCD_val[1]);
-        System.out.println(ABCD_val[2]);
-        System.out.println(ABCD_val[3]);
-        String hash = bits2hex(int2bits(ABCD_val[0], 32))+bits2hex(int2bits(ABCD_val[1], 32))+bits2hex(int2bits(ABCD_val[2], 32))+bits2hex(int2bits(ABCD_val[3], 32));
-        System.out.println("HASH: "+hash);
-    }   
-    
+        Scanner in = new Scanner(System.in);
+        System.out.println("Enter Plain Text: ");
+        String s = in.nextLine();
+        System.out.println(toHexString(computeMD5(s.getBytes())));
+    }
 }
