@@ -279,20 +279,20 @@ class DES{
     }
     public static String DES3encrypt(String hexMessage, boolean[][] keys1,boolean[][] keys2) {
         String enc1 = DESencrypt(hexMessage, keys1);
-        System.out.println(enc1);
+        
         Collections.reverse(Arrays.asList(keys2));
         String enc2 = DESencrypt(enc1, keys2);
-        System.out.println(enc2);
+        
         String enc3 = DESencrypt(enc2, keys1);
         return enc3;
     }
     public static String DES3decrypt(String encMessage, boolean[][] keys1,boolean[][] keys2) {
         Collections.reverse(Arrays.asList(keys1));
         String dec1 = DESencrypt(encMessage, keys1);
-        System.out.println(dec1);
+        
+        Collections.reverse(Arrays.asList(keys2));
         String dec2 = DESencrypt(dec1, keys2);
-        System.out.println(dec2);
-        Collections.reverse(Arrays.asList(keys1));
+        
         String dec3 = DESencrypt(dec2, keys1);
         return dec3;
     }
@@ -303,14 +303,14 @@ class DES{
 
         /* SINGLE DES */
 
-        // System.out.println("Enter 64 bit binary key (16 hex chars): ");
-        // strKey1 = scanner.nextLine();
-        strKey = "00010011 00110100 01010111 01111001 10011011 10111100 11011111 11110001";
-        Keys = keyGen(strKey);
+        System.out.println("Enter 64 bit binary key (16 hex chars): ");
+        strKey1 = scanner.nextLine();
+        // strKey = "00010011 00110100 01010111 01111001 10011011 10111100 11011111 11110001";
+        Keys = keyGen(strKey1);
 
-        // System.out.println("Enter Message (16 hex chars): ");
-        // message = scanner.nextLine();
-        message = "0123456789ABCDEF";
+        System.out.println("Enter Message (16 hex chars): ");
+        message = scanner.nextLine();
+        // message = "0123456789ABCDEF";
         encrypted = DESencrypt(message,Keys);
         System.out.println("Single DES");
         System.out.println("Encrypted : "+encrypted);
@@ -319,51 +319,48 @@ class DES{
         Collections.reverse(Arrays.asList(Keys));
         decrypted = DESencrypt(encrypted,Keys);
         System.out.println("Decrypted : "+decrypted);
-        scanner.close();
-
+        
         /* DOUBLE DES */
 
-        // System.out.println("K1 : Enter 64 bit binary key (16 hex chars): ");
-        // strKey1 = scanner.nextLine();
-        // System.out.println("K2 : Enter 64 bit binary key (16 hex chars): ");
-        // strKey2 = scanner.nextLine();
-        strKey1 = "00010011 00110100 01010111 01111001 10011011 10111100 11011111 11110001";
-        strKey2 = "00010011 01110100 11010100 11001001 10011011 10100100 11011111 11110001";
+        System.out.println("Double DES");
+        System.out.println("K1 : Enter 64 bit binary key (16 hex chars)");
+        strKey1 = scanner.nextLine();
+        System.out.println("K2 : Enter 64 bit binary key (16 hex chars)");
+        strKey2 = scanner.nextLine();
+        // strKey1 = "00010011 00110100 01010111 01111001 10011011 10111100 11011111 11110001";
+        // strKey2 = "00010011 01110100 11010100 11001001 10011011 10100100 11011111 11110001";
         Keys1 = keyGen(strKey1);Keys2 = keyGen(strKey2);
 
-        // System.out.println("Enter Message (16 hex chars): ");
-        // message = scanner.nextLine();
-        message = "0123456789ABCDEF";
+        System.out.println("Enter Message (16 hex chars): ");
+        message = scanner.nextLine();
+        // message = "0123456789ABCDEF";
         encrypted = DES2encrypt(message,Keys1,Keys2);
-        System.out.println("Double DES");
         System.out.println("Encrypted : "+encrypted);
 
         Collections.reverse(Arrays.asList(Keys1));
         Collections.reverse(Arrays.asList(Keys2));
         decrypted = DES2encrypt(encrypted,Keys2,Keys1);
         System.out.println("Decrypted : "+decrypted);
-        scanner.close();
-
+        
         /* TRIPLE DES */
 
-        strKey1 = "00010011 00110100 01010111 01111001 10011011 10111100 11011111 11110001";
-        strKey2 = "00010011 01110100 11010100 11001001 10011011 10100100 11011111 11110001";
-        // strKey3 = "11010011 11110100 10010100 01111001 11111011 10100110 11010011 11110001";
-        Keys1 = keyGen(strKey1);Keys2 = keyGen(strKey2);
-        message = "0123456789ABCDEF";
-
         System.out.println("Triple DES");
+        System.out.println("K1 : Enter 64 bit binary key (16 hex chars) K1: ");
+        strKey1 = scanner.nextLine();
+        System.out.println("K2 : Enter 64 bit binary key (16 hex chars) K2: ");
+        strKey2 = scanner.nextLine();
+        // strKey1 = "00010011 00110100 01010111 01111001 10011011 10111100 11011111 11110001";
+        // strKey2 = "00010011 01110100 11010100 11001001 10011011 10100100 11011111 11110001";
+        Keys1 = keyGen(strKey1);Keys2 = keyGen(strKey2);
+        System.out.println("Enter Message (16 hex chars): ");
+        message = scanner.nextLine();
+        // message = "0123456789ABCDEF";
+
         encrypted = DES3encrypt(message, Keys1, Keys2);
         System.out.println("Encrypted : "+encrypted);
 
         decrypted = DES3decrypt(encrypted,Keys1,Keys2);
         System.out.println("Decrypted : "+decrypted);
-
-        Collections.reverse(Arrays.asList(Keys1));
-        Collections.reverse(Arrays.asList(Keys2));
-        decrypted = DES3encrypt(encrypted,Keys1,Keys2);
-        System.out.println("Decrypted : "+decrypted);
-        // decrypted = DES3decrypt(encrypted, Keys1, Keys2);
-
+        scanner.close();
     }
 }

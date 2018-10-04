@@ -1,59 +1,51 @@
-import java.util.Arrays;
+import java.math.BigInteger;
+import java.util.Random;
 import java.util.Scanner;
 
-class RSA{
-  public static int GCD(int a, int b) {
-    if(b == 0)
-        return a;
-    return GCD(b, a%b);
-  }
-
-  public static int[][] getKeyNums(int p, int q){
-    int n = p * q;
-    int phi_n = (p-1)*(q-1);
-    int e,d;
-    for (e =5;e<phi_n;e++){
-      if (GCD(e, phi_n)==1){
-        break;
-      }
+public class RSA {
+    
+    public static BigInteger[] get_pq(int start){
+        BigInteger p = new BigInteger(1024, 99, new Random());
+        BigInteger q = new BigInteger(1024, 99, new Random());
+        System.out.println("p: " + p);
+        System.out.println("q: " + q);
+        BigInteger[] arr = {p,q};
+        return arr;
     }
-    for (d =3;d<phi_n;d++)
-      if (e*d%phi_n==1){
-        break;
-      }
-    return new int[][] {{e,n},{d,n}};
-  }
-  public static int modmul(int n,int exp, int mod){
-    int result = n%mod;
-    for (int i =1;i<exp;i++){
-      result = (result*n)%mod;
-    }
-    return result;
-  }
-  public static double encrypt(int[] key,int m){
-    return modmul(m,key[0],key[1]);
-  }
+    
+    public static void main(String[] args) {
+        
+        BigInteger p, q;
+        BigInteger[] arr = get_pq(123);
+        p = arr[0];
+        q = arr[1];
+        
+        BigInteger n = p.multiply(q);
+        BigInteger p1 = p.subtract(BigInteger.ONE);
+        BigInteger q1 = q.subtract(BigInteger.ONE);
+        BigInteger euler_fn = p1.multiply(q1);
+        
+        BigInteger e = new BigInteger(1024, 99, new Random());
+        for( ; e.compareTo(n)==-1; e=e.add(BigInteger.ONE)){
+            if(e.gcd(euler_fn).compareTo(BigInteger.ONE) == 0)
+                break;
+        }
 
-  public static void main(String[] args) {
-    Scanner scanner = new Scanner(System.in);
-    System.out.print("Enter p: ");
-    int p = scanner.nextInt();
-    System.out.print("Enter q: ");
-    int q = scanner.nextInt();
-    System.out.print("Enter message (number less than "+p*q+"): ");
-    int msg = scanner.nextInt();
-    int keys[][] = getKeyNums(p,q);
-    int[] pub_key = keys[0];
-    int[] pri_key = keys[1];
-    System.out.println("\nPublic Key  :"+Arrays.toString(pub_key));
-    System.out.println("Private Key :"+Arrays.toString(pri_key));
-
-    int enc = (int)encrypt(pub_key, msg);
-    System.out.println("\nEncrypted: "+enc);
-
-    int dec = (int)encrypt(pri_key, enc);
-    System.out.println("Decrypted: "+ dec);
-
-    scanner.close();
-  }
+        BigInteger d = e.modInverse(euler_fn);
+        
+        System.out.println("Enter a message (less than " + n + "): ");
+        Scanner scan = new Scanner(System.in);
+        BigInteger m = new BigInteger(scan.nextLine());
+        System.out.print("Public key is ");
+        System.out.println(e);
+        System.out.print("Private key is ");
+        System.out.println(d);
+        
+        BigInteger c = m.modPow(e, n);
+        System.out.print("Encrypted message is ");
+        System.out.println(c);
+        BigInteger me = c.modPow(d, n);
+        System.out.print("Decrypted message is ");
+        System.out.println(me);
+    }   
 }

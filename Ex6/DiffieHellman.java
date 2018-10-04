@@ -1,131 +1,119 @@
-import java.util.Arrays;
-import java.util.Random;;
-import java.util.Scanner;
+import java.math.BigInteger;
+import java.util.*;
+import java.security.SecureRandom;
 
-class DiffieHellman{
-    
-  public static int modmul(int n,int exp, int mod){
-    int result = n%mod;
-    for (int i =1;i<exp;i++){
-      result = (result*n)%mod;
-    }
-    return result;
-  }
- 
-    // Utility function to do modular exponentiation. It returns (x^y) % p
-    static int power(int x, int y, int p) {
-         
-        int res = 1; // Initialize result
-         
-        //Update x if it is more than or equal to p
-        x = x % p; 
- 
-        while (y > 0) {
-             
-            // If y is odd, multiply x with result
-            if ((y & 1) == 1)
-                res = (res * x) % p;
-         
-            // y must be even now
-            y = y >> 1; // y = y/2
-            x = (x * x) % p;
-        }
-         
-        return res;
-    }
-     
-    /* This function is called for all k trials. It returns false if n is composite and returns false if n is probably prime. 
-       d is an odd number such that d*2<sup>r</sup> = n-1 for some r >= 1 */
-    static boolean miillerTest(int d, int n) {
-         
-        // Pick a random number in [2..n-2] Corner cases make sure that n > 4
-        int a = 2 + (int)(Math.random() % (n - 4));
-     
-        // Compute a^d % n
-        int x = power(a, d, n);
-     
-        if (x == 1 || x == n - 1)
-            return true;
-     
-        /* Keep squaring x while one of the
-         following doesn't happen
-         (i) d does not reach n-1
-         (ii) (x^2) % n is not 1
-         (iii) (x^2) % n is not n-1
-        */
-        while (d != n - 1) {
-            x = (x * x) % n;
-            d *= 2;
-         
-            if (x == 1)
-                return false;
-            if (x == n - 1)
-                return true;
-        }
-     
-        // Return composite
-        return false;
-    }
-     
-    /* It returns false if n is composite and returns true if n is probably prime. k is an input parameter that 
-     determines accuracy level. Higher value of k indicates more accuracy.
-    */
-    static boolean isPrime(int n, int k) {
-         
-        // Corner cases
-        if (n <= 1 || n == 4)
+public class DiffieHellman {
+    public static boolean isPrime(BigInteger b) {
+        int iterations=-1;
+        if ((b.intValue()==0)||(b.intValue()==1))
             return false;
-        if (n <= 3)
+            /** base case - 2 is prime **/
+        if (b.intValue()==2)
             return true;
-     
-        // Find r such that n = 2^d * r + 1 for some r >= 1
-        int d = n - 1;
-         
-        while (d % 2 == 0)
-            d /= 2;
-     
-        // Iterate given number of 'k' times
-        for (int i = 0; i < k; i++)
-            if (miillerTest(d, n) == false)
+        /** an even number other than 2 is composite **/
+        if (b.mod(BigInteger.valueOf(2)).intValue()==0)
+            return false;
+        BigInteger s = null;
+         s=b.subtract(BigInteger.valueOf(1));
+        while (s.mod(BigInteger.valueOf(2)).intValue()==0){
+            s=s.divide(BigInteger.valueOf(2));
+            iterations++;
+        }
+        SecureRandom rand = new SecureRandom();
+        for (int i = 0; i <=iterations; i++){
+            BigInteger r = new BigInteger(14,rand);            
+            BigInteger a = (r.mod(b.subtract(BigInteger.valueOf(1)))).add(BigInteger.valueOf(1));
+            BigInteger temp = s;
+            BigInteger mod = a.modPow(temp, b);
+            while (temp.intValue() != b.intValue()-1 && mod.intValue() != 1 && mod.intValue() != b.intValue()-1){
+                mod = mulMod(mod, mod, b);
+                temp=temp.multiply(BigInteger.valueOf(2));
+            }
+            if (mod.intValue() != b.intValue()-1 && (temp.mod(BigInteger.valueOf(2))).intValue() == 0)
                 return false;
-     
+        }
         return true;
     }
+
+    public static BigInteger sqrt(BigInteger n) {
+        BigInteger a = BigInteger.ONE;
+        BigInteger b = new BigInteger(n.shiftRight(5).add(new BigInteger("8")).toString());
+        while(b.compareTo(a) >= 0) {
+          BigInteger mid = new BigInteger(a.add(b).shiftRight(1).toString());
+          if(mid.multiply(mid).compareTo(n) > 0) b = mid.subtract(BigInteger.ONE);
+          else a = mid.add(BigInteger.ONE);
+        }
+        return a.subtract(BigInteger.ONE);
+      }
+    public static void findPrimefactors( ArrayList<BigInteger> s, BigInteger n)
+    {
+        while (n.mod(BigInteger.valueOf(2)) .intValue()== 0){
+            s.add(BigInteger.valueOf(2));
+            n = n.divide(BigInteger.valueOf(2));
+        }
+        BigInteger i=new BigInteger("3");
+        for ( ; i.compareTo(sqrt(n))==-1||i.compareTo(sqrt(n))==0; i = i.add(BigInteger.valueOf(2))){
+            while (n.mod(i).intValue() == 0){
+                s.add(i);
+                n = n.divide(i);
+            }
+        }
+
+        if (n.compareTo(BigInteger.valueOf(2))==1)
+            s.add(n);
+    }
     
-  public static void main(String[] args) {
-    Scanner scanner = new Scanner(System.in);
-    System.out.print("Enter q : ");
-    int q = scanner.nextInt();
-    //Check the primality of 'q' usig Rabin-Miller.
-    /* k denotes the number of random values to test for. */
-    boolean val = isPrime(q,10);
-    if (!val){
-        System.err.println("Not a prime !!");
-        System.exit(0);
+    public static BigInteger findPrimitive(BigInteger n) {
+        ArrayList<BigInteger> s=new ArrayList<BigInteger>();
+        if (isPrime(n)==false)
+            return BigInteger.valueOf(-1);
+        BigInteger phi = n.subtract(BigInteger.valueOf(1));
+        findPrimefactors(s, phi);
+        SecureRandom rand=new SecureRandom();
+        BigInteger r=new BigInteger(8,rand);
+        for (; r.compareTo(phi)==0||r.compareTo(phi)==-1; r=r.add(BigInteger.valueOf(1))){
+            boolean flag = false;
+            for (int i = 0; i<s.size(); i++){
+                if(r.modPow(phi.divide(s.get(i)), n).intValue()==1){
+                    flag = true;
+                    break;
+                }
+             }
+
+             if (flag == false)
+               return r;
+        }
+
+        return BigInteger.valueOf(-1);
     }
-    else{
-        System.out.println("q is a prime !!");
+    
+    public static BigInteger mulMod(BigInteger a, BigInteger b, BigInteger mod) {
+         return a.multiply(b).mod(mod);
     }
-    System.out.print("Enter alpha : ");
-    int alpha = scanner.nextInt();
-    // A & B agree upon q and alpha
 
-    Random r = new Random();
-    int Xa = r.nextInt(q);
-    int Xb = r.nextInt(q);
-    System.out.println("Xa = "+Xa+"  Xb = "+Xb);
-    // A & B randomly generate secret keys
-
-    int Ya = modmul(alpha, Xa, q);
-    int Yb = modmul(alpha, Xb, q);
-    System.out.println("Ya = "+Ya+"  Yb = "+Yb);
-    // A and B generate public keys and share them with each other
-
-    int Kb = modmul(Ya, Xb, q);
-    int Ka = modmul(Yb, Xa, q);
-    // A and B generate shared session key
-    // using other's private key and its own secret key
-    System.out.println("Ka = "+Ka+"  Kb = "+Kb);
-    scanner.close();
-  }
+    public static void main(String[] args) {
+        BigInteger p_big;
+        SecureRandom random=new SecureRandom();
+        int flag=0;
+        do{
+            p_big=new BigInteger(15,random);
+            if(isPrime(p_big)){
+                flag=1;
+                break;
+            }     
+        }while(flag!=1);
+        BigInteger r=findPrimitive(p_big);
+        SecureRandom rand = new SecureRandom();
+        System.out.println("Prime p: "+p_big);
+        System.out.println("Random primitive root: "+r);
+        BigInteger  xa=new BigInteger(15,rand);
+        BigInteger  ya=r.modPow(xa, p_big);
+        BigInteger  xb=new BigInteger(15,rand);
+        BigInteger  yb=r.modPow(xb, p_big);
+        System.out.println("Xa: "+xa+" Xb: "+xb);
+        System.out.println("Ya: "+ya+" Yb: "+yb);
+        BigInteger  ka=yb.modPow(xa, p_big);
+        BigInteger  kb=ya.modPow(xb, p_big);
+        System.out.println("Kab: " +ka+" Kab: "+kb);
+    }
 }
