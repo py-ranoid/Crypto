@@ -41,14 +41,14 @@ class RailFence {
         }
 
         // Print Encrypted message
-        System.out.println("\nENCRYPTED :");
+        System.out.println("\nEncrypted :");
         for (i=0;i<key;i++){
             for (j=0;j<len;j++)
                 if (matrix[i][j]!='*')
                     System.out.print(matrix[i][j]);
         }        
         
-        System.out.println("\n\nDECRYPTED :");
+        System.out.println("Decrypted :");
         tkey = key -1;
         for (i=0;i<len;i++){
             ind = tkey - Math.abs(tkey-i%(2*tkey));

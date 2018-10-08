@@ -67,10 +67,10 @@ class CaeserCipher {
         int key=scan.nextInt();
 
         char[] encrypted = enc(msg,key);
-        System.out.println("ENCRYPTED :"+String.valueOf(encrypted));
+        System.out.println("Encrypted : "+String.valueOf(encrypted));
 
         char[] decrypted = enc(new String(encrypted),-key);
-        System.out.println("DECRYPTED : "+String.valueOf(decrypted));
+        System.out.println("Decrypted : "+String.valueOf(decrypted));
 
         // Cryptographic analysis
         Scanner scan2=new Scanner(System.in);
